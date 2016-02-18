@@ -36,6 +36,7 @@ class Importer extends Module
 			$parentTab = self::createTab(0,$this->name,'EDC feeds importer','AdminImporter');
 		self::createTab($parentTab, $this->name, 'Import des produits', 'AdminImporterRunning');
 		self::createTab($parentTab, $this->name, 'Configuration', 'AdminImporterConfiguration');
+		self::createTab($parentTab, $this->name, 'Counter', 'AdminImporterCounter');
 		// self::createTab($parentTab, $this->name, 'CRON', 'AdminImporterCron');
 
 		Configuration::updateValue('IMPORTER_URL_FULL_FEED',	'http://graphics.edc-internet.nl/b2b_feed.php?key=[KEY]&sort=xml&type=xml&lang=[LANG]&version=2015');
@@ -45,6 +46,9 @@ class Importer extends Module
 		Configuration::updateValue('IMPORTER_IMPORT_CURRENT_STEP', 		0);
 		Configuration::updateValue('IMPORTER_IMPORT_CURRENT_KEY_IN_XML', 0);
 		Configuration::updateValue('IMPORTER_XML_FILE','');
+		Configuration::updateValue('IMPORTER_XML_COUNT');
+
+		//Créer le dossier import
 
 
 		if (!parent::install() || 
@@ -64,10 +68,14 @@ class Importer extends Module
 		Configuration::deleteByName('IMPORTER_IMPORT_CURRENT_STEP');
 		Configuration::deleteByName('IMPORTER_IMPORT_CURRENT_KEY_IN_XML');
 		Configuration::deleteByName('IMPORTER_XML_FILE');
+		Configuration::deleteByName('IMPORTER_XML_COUNT');
+
+		//Vider le dossier import et le supprimer
 
 		$this->uninstallModuleTab('AdminImporter');
 		$this->uninstallModuleTab('AdminImporterRunning');
 		$this->uninstallModuleTab('AdminImporterConfiguration');
+		$this->uninstallModuleTab('AdminImporterCounter');
 		// $this->uninstallModuleTab('AdminImporterCron');
 
 		if (!parent::uninstall() ||

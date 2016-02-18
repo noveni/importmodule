@@ -1,3 +1,5 @@
 .DS_Store
-/import
+/import/*
+/counter/*
+/views/.sass-cache
 config_fr.xml
