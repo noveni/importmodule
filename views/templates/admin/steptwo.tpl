@@ -18,6 +18,10 @@
 			<div class="panel-footer">
 				<button type="button" class="btn btn-default" id="reset_xml_line" data-url="{$link->getAdminLink('AdminImporterRunning',true)}"><i class="process-icon-refresh"></i>{l s='Reset XML line count'}</button>
 				<button type="button" class="btn btn-default" id="test_import" data-url="{$link->getAdminLink('AdminImporterRunning',true)}"><i class="process-icon-upload"></i>{l s='Import test'}</button>
+				<form action="{$link->getAdminLink('AdminImporterRunning',true)}" method="post" id="">
+					<input type="hidden" id="submitStep2Importer" name="submitStep2Importer" value="1">
+					<input type="submit" class="btn btn-defa" value="Envoyer">
+				</form>
 			</div>
 		</div>
 		<div class="panel">

@@ -17,12 +17,14 @@ testImport = function() {
 			action: 'testImport'
 		},
 		method: "POST",
-		dataType: 'html',
+		dataType: 'json',
 		success: function(data){
-			console.log('SUCCESS '+ data)
+			console.log('SUCCESS '+ JSON.stringify(data))
+			$("#error_stant").html(data)
 		},
 		error: function(data){
-			console.log('WARNING '+ data)
+			console.log('WARNING ')
+			$("#error_stant").html(data.responseText)
 		}
 	});
 }
@@ -43,6 +45,7 @@ theloopXml = function(form) {
 					console.log('End of loop');//On rajoute des boutons pour passer à la page suivante
 				else if (data.status == 'looping')
 				{
+
 					xml_current_key = data.current_key_in_xml
 					updateStat()
 					injectInHtml(xml_current_key,data.product);

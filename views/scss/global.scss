@@ -1,0 +1,12 @@
+//@import "compass/reset";
+.products_list{
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+.header_product{
+	border-bottom: 2px solid #ddd;
+	> div{
+		display: inline-block;
+	}
+}

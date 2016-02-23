@@ -1,0 +1,14 @@
+/* line 2, ../scss/global.scss */
+.products_list {
+  padding: 0;
+  margin: 0;
+  list-style: none; }
+
+/* line 7, ../scss/global.scss */
+.header_product {
+  border-bottom: 2px solid #ddd; }
+  /* line 9, ../scss/global.scss */
+  .header_product > div {
+    display: inline-block; }
+
+/*# sourceMappingURL=global.css.map */
