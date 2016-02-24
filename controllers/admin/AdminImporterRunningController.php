@@ -194,7 +194,7 @@ class AdminImporterRunningController extends ModuleAdminController
 	public function xml2array ( $xmlObject, $out = array () )
 	{
 	    foreach ( (array) $xmlObject as $index => $node )
-	        $out[$index] = ( is_object ( $node ) ) ? xml2array ( $node ) : $node;
+	        $out[$index] = ( is_object ( $node ) ) ? $this->xml2array ( $node ) : $node;
 
 	    return $out;
 	}
@@ -214,7 +214,7 @@ class AdminImporterRunningController extends ModuleAdminController
 	public function testImport()
 	{
 		$this->loadXML();
-		$product_info = $this->xml_file_content->product[1];
+		$product_info = $this->xml_file_content->product[12];
 		//p($product_info);
 		$product = new Product();
 
@@ -223,36 +223,43 @@ class AdminImporterRunningController extends ModuleAdminController
 		$product->supplier = 'edc';
 		$product->price_tin = (int)$product_info->price->b2c;
 		$product->tax_rate = 21;
-		$product->category = $this->xml2array($product_info->categories);
+		$product->category = $product_info->categories;
 		$product->link_rewrite = array((int)Configuration::get('PS_LANG_DEFAULT') => Tools::link_rewrite($product_info->title));
-		$ncategory = count($product->category['category']);
+		$ncategory = count($product->category->category);
 		$new_category_tab = array();
-		$new_category_tab2 = array();
 
-		for ($i = 0; $i < $ncategory; $i++)
-		{	
-			$new_category_tab2[] = (string)$product->category['category'][$i]->cat[0]->title."/".(string)$product->category['category'][$i]->cat[1]->title;
-			// if (!$this->in_array_r((int)$product->category['category'][$i]->cat[0]->id,$new_category_tab))
-			// {
-			// 	$new_category_tab[] = array(
-			// 		'id' => (int)$product->category['category'][$i]->cat[0]->id,
-			// 		'title' => (string)$product->category['category'][$i]->cat[0]->title,
-			// 		'id_parent' => (int) 0
-			// 	);
-			// }
-
-			// if (!$this->in_array_r((int)$product->category['category'][$i]->cat[1]->id,$new_category_tab))
-			// {
-			// 	$new_category_tab[] = array(
-			// 		'id' => (int)$product->category['category'][$i]->cat[1]->id,
-			// 		'title' => (string)$product->category['category'][$i]->cat[1]->title,
-			// 		'id_parent' => (int)$product->category['category'][$i]->cat[0]->id
-			// 	);
-			// }
-
-
+		for ($i = 0; $i < $ncategory; ++$i)
+		{
+			$new_category_tab[] = (string)$product->category->category[$i]->cat[0]->title.'/'.(string)$product->category->category[$i]->cat[1]->title;
 		}
-		$product->category = $new_category_tab2;
+		// p($product_info2->categories);
+		// p($product->category);
+		// p($ncategory);
+		// for ($i = 0; $i < $ncategory; $i++)
+		// {	
+		// 	$new_category_tab2[] = (string)$product->category['category'][$i]->cat[0]->title."/".(string)$product->category['category'][$i]->cat[1]->title;
+		// 	// if (!$this->in_array_r((int)$product->category['category'][$i]->cat[0]->id,$new_category_tab))
+		// 	// {
+		// 	// 	$new_category_tab[] = array(
+		// 	// 		'id' => (int)$product->category['category'][$i]->cat[0]->id,
+		// 	// 		'title' => (string)$product->category['category'][$i]->cat[0]->title,
+		// 	// 		'id_parent' => (int) 0
+		// 	// 	);
+		// 	// }
+
+		// 	// if (!$this->in_array_r((int)$product->category['category'][$i]->cat[1]->id,$new_category_tab))
+		// 	// {
+		// 	// 	$new_category_tab[] = array(
+		// 	// 		'id' => (int)$product->category['category'][$i]->cat[1]->id,
+		// 	// 		'title' => (string)$product->category['category'][$i]->cat[1]->title,
+		// 	// 		'id_parent' => (int)$product->category['category'][$i]->cat[0]->id
+		// 	// 	);
+		// 	// }
+
+
+		// }
+		$product->category = $new_category_tab;
+		//p($product->category);
 
 		$default_language_id = (int)Configuration::get('PS_LANG_DEFAULT');
 		$id_lang = Tools::getValue('iso_lang');
@@ -357,8 +364,8 @@ class AdminImporterRunningController extends ModuleAdminController
 			
 		}
 
-		// if (!isset($product->id_category_default) || !$product->id_category_default)
-		// 	$product->id_category_default = isset($product->id_category[0]) ? (int)$product->id_category[0] : (int)Configuration::get('PS_HOME_CATEGORY');
+		if (!isset($product->id_category_default) || !$product->id_category_default)
+			$product->id_category_default = isset($product->id_category[0]) ? (int)$product->id_category[0] : (int)Configuration::get('PS_HOME_CATEGORY');
 
 		//$link_rewrite = (is_array($product->link_rewrite) && isset($product->link_rewrite[$id_lang])) ? trim($product->link_rewrite[$id_lang]) : '';
 		//$valid_link = Validate::isLinkRewrite($link_rewrite);
@@ -384,6 +391,32 @@ class AdminImporterRunningController extends ModuleAdminController
 		$res = false;
 
 		$product->add();
+
+
+		//Category
+		if (isset($product->id_category) && is_array($product->id_category))
+			$product->updateCategories(array_map('intval', $product->id_category));
+
+		//Supplier
+		if (isset($product->id) && $product->id && isset($product->id_supplier) && property_exists($product, 'supplier_reference'))
+		{
+			$id_product_supplier = (int)ProductSupplier::getIdByProductAndSupplier((int)$product->id, 0, (int)$product->id_supplier);
+			if ($id_product_supplier)
+				$product_supplier = new ProductSupplier($id_product_supplier);
+			else
+				$product_supplier = new ProductSupplier();
+
+			$product_supplier->id_product = (int)$product->id;
+			$product_supplier->id_product_attribute = 0;
+			$product_supplier->id_supplier = (int)$product->id_supplier;
+			$product_supplier->product_supplier_price_te = $product->wholesale_price;
+			$product_supplier->product_supplier_reference = $product->supplier_reference;
+			$product_supplier->save();
+		}
+
+		//Image
+		
+
 		// $product->id_shop_default = $this->context->shop->id;
 		// $product->supplier_reference = $product_info->artnr;
 		// $product->name = array((int)Configuration::get('PS_LANG_DEFAULT') => $product_info->title);
