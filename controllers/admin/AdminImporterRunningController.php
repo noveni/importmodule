@@ -190,23 +190,182 @@ class AdminImporterRunningController extends ModuleAdminController
 		die(json_encode($product));
 	}
 
+	/**
+	* This function create/add attribute if it doesn't exist
+	* @param array $variants
+	* @return bool
+	*/
+	private function createAttribute($variants)
+	{
+		/*
+		DATA SCHEME of 
+		[variants] => SimpleXMLElement Object
+        (
+            [variant] => Array
+                (
+                    [0] => SimpleXMLElement Object
+                        (
+                            [id] => 34945
+                            [type] => S
+                            [subartnr] => 28403911040
+                            [ean] => 4024144254118
+                            [stock] => Y
+                            [title] => Large
+                        )
+
+                    [1] => SimpleXMLElement Object
+                        (
+                            [id] => 34944
+                            [type] => S
+                            [subartnr] => 28403911030
+                            [ean] => 4024144254101
+                            [stock] => Y
+                            [title] => Medium
+                        )
+                    [3] => SimpleXMLElement Object
+		                (
+		                    [id] => 34925
+		                    [type] => SimpleXMLElement Object
+		                        (
+		                        )
+
+		                    [subartnr] => usb001eu
+		                    [ean] => 8714273796318
+		                    [stock] => Y
+		                )
+                )
+
+        )
+        */
+		// :TODO, if the type is different than S we need to put the product 
+		// with his variants in a special array to alert the useradmin
+		
+		$default_language = Configuration::get('PS_LANG_DEFAULT');
+
+		$groups = array();
+		foreach (AttributeGroup::getAttributesGroups($default_language) as $group)
+			$groups[$group['name']] = (int)$group['id_attribute_group'];
+		p($groups);
+
+		$attributes = array();
+		foreach (Attribute::getAttributes($default_language) as $attribute)
+			$attributes[$attribute['attribute_group'].'_'.$attribute['name']] = (int)$attribute['id_attribute'];
+		
+		p($attributes);
+		//We can make a conversion table
+		// It's obligatory to make that possible
+		// conversion table with language
+		dazdzef
+		/*
+			[ 
+			M/L, 
+			S/M, 
+			Large, 
+			XL, 
+			Small, 
+			Medium, 
+			XXL, 
+			Cup B, 
+			Cup C, 
+			S/L, 
+			XL-XXL, 
+			QS 46-50, 
+			Maat 2, 
+			Maat 3, 
+			Maat 4, 
+			Maat 5, 
+			85 D, 
+			85 C, 
+			80 B, 
+			75 B, 
+			L/XL, 
+			80 B/M, 
+			85 B/L, 
+			75 B/S, 
+			Maat 1, 
+			Maat 46, 
+			Maat 45, 
+			Maat 44, 
+			Maat 43, 
+			Maat 42, 
+			Maat 41, 
+			Maat 40, 
+			Maat 39, 
+			Maat 38, 
+			Maat 37, 
+			Maat 36, 
+			Xs, 
+			86 cm, 
+			76 cm, 
+			66 cm, 
+			56 cm, 
+			One Size, 
+			90 B/XL, 
+			85 C/L, 
+			80 C/M, 
+			Xtra Small, 
+			85 B, 
+			75 A, 
+			Maat 7, 
+			Maat 6, 
+			85 D/XL, 
+			80 C/L, 
+			50 mm, 
+			40 mm, 
+			3-4X 48-54, 
+			1-2X 44-48, 
+			2XL 48, 
+			1XL 44/46, 
+			XXXL, 
+			PS 44-52, 
+			3XL 50/52, 
+			90 D, 
+			90 E, 
+			95 D, 
+			85 E, 
+			95 E, 
+			XXL/XXXL, 
+			32 mm, 
+			30 mm, 
+			28 mm, 
+			25 mm, 
+			12 mm, 
+			8 mm, 
+			10 mm, 
+			9 mm, 
+			11 mm, 
+			55 mm, 
+			45 mm, 
+			20 mm, 51 mm, 48 mm, 42 mm, 39 mm, 36 mm, 33 mm, 54 mm, 60 mm, 35 mm, 4mm, 6 mm, 7mm, 5mm, 100mm, 90mm, 80mm, 70mm, 18 cm, 16 cm, XXXXL, 75 C/S, XS/S, 90 C/XL, 75 A/S, ]
+		*/
+		//Cock_ring size
+
+		d('Bye');
+
+	}
+
 	public function testImport()
 	{
 		$this->loadXML();
-		$product_info = $this->xml_file_content->product[12];
-		//p($product_info);
-		$product = new Product();
+		$product_info = $this->xml_file_content->product[3];
+		$this->createAttribute($product_info->variants);
+		d($product_info);
 
-		$product->name = array((int)Configuration::get('PS_LANG_DEFAULT') => $product_info->title);
+
+		// We need to check the variant/déclinaisons/attribute
+
+
+		$product = new Product();
+		$product->name = array((int)Configuration::get('PS_LANG_DEFAULT') => (string)$product_info->title);
 		$product->manufacturer = (string)$product_info->brand->title;
 		$product->supplier = 'edc';
 		$product->price_tin = (int)$product_info->price->b2c;
 		$product->tax_rate = 21;
 		$product->category = $product_info->categories;
-		$product->link_rewrite = array((int)Configuration::get('PS_LANG_DEFAULT') => Tools::link_rewrite($product_info->title));
+		$product->link_rewrite = array((int)Configuration::get('PS_LANG_DEFAULT') => Tools::link_rewrite((string)$product_info->title));
+		$product->image = (array) $product_info->pics->pic;
 		$ncategory = count($product->category->category);
 		$new_category_tab = array();
-
 		for ($i = 0; $i < $ncategory; ++$i)
 		{
 			$new_category_tab[] = (string)$product->category->category[$i]->cat[0]->title.'/'.(string)$product->category->category[$i]->cat[1]->title;
@@ -320,9 +479,9 @@ class AdminImporterRunningController extends ModuleAdminController
 		if (!isset($product->id_category_default) || !$product->id_category_default)
 			$product->id_category_default = isset($product->id_category[0]) ? (int)$product->id_category[0] : (int)Configuration::get('PS_HOME_CATEGORY');
 
-		//$link_rewrite = (is_array($product->link_rewrite) && isset($product->link_rewrite[$id_lang])) ? trim($product->link_rewrite[$id_lang]) : '';
-		//$valid_link = Validate::isLinkRewrite($link_rewrite);
-
+		p($product->link_rewrite);
+		$link_rewrite = (is_array($product->link_rewrite) && isset($product->link_rewrite[$id_lang])) ? trim($product->link_rewrite[$id_lang]) : '';
+		$valid_link = Validate::isLinkRewrite($link_rewrite);
 
 		// if ((isset($product->link_rewrite[$id_lang]) && empty($product->link_rewrite[$id_lang])) || !$valid_link)
 		// {
@@ -368,7 +527,41 @@ class AdminImporterRunningController extends ModuleAdminController
 		}
 
 		//Image
+		$base_url = 'http://cdn.edc-internet.nl/500/';
+		if (isset($product->image) && is_array($product->image) && count($product->image))
+		{
+			foreach ($product->image as $key => $url)
+			{
+				$url = $base_url.$url;
+				$url = trim($url);
+				$error = false;
+				if (!empty($url))
+				{
+					$url = str_replace(' ', '%20', $url);
 
+					$image = new Image();
+					$image->id_product = (int)$product->id;
+					$image->position = Image::getHighestPosition($product->id) + 1;
+					$image->cover = true;
+					// file_exists doesn't work with HTTP protocol
+					if ($image->add())
+					{
+						$image->associateTo($shops);
+						if (!AdminImportController::copyImg($product->id,$image->id,$url,'products',!Tools::getValue('regenerate')))
+						{
+							$image->delete();
+							$this->warnings[] = sprintf(Tools::displayError('Error copying image: %s'), $url);
+						}
+					}
+					else
+						$error = true;
+				}
+				else
+					$error = true;
+				if ($error)
+					$this->warnings[] = sprintf(Tools::displayError('Product #%1$d: the picture (%2$s) cannot be saved.'), $image->id_product, $url);
+			}
+		}
 
 		// $product->id_shop_default = $this->context->shop->id;
 		// $product->supplier_reference = $product_info->artnr;

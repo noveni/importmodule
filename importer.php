@@ -37,6 +37,7 @@ class Importer extends Module
 		self::createTab($parentTab, $this->name, 'Import des produits', 'AdminImporterRunning');
 		self::createTab($parentTab, $this->name, 'Configuration', 'AdminImporterConfiguration');
 		self::createTab($parentTab, $this->name, 'Counter', 'AdminImporterCounter');
+		self::createTab($parentTab, $this->name, 'Labo', 'AdminImporterLab');
 		// self::createTab($parentTab, $this->name, 'CRON', 'AdminImporterCron');
 
 		Configuration::updateValue('IMPORTER_URL_FULL_FEED',	'http://graphics.edc-internet.nl/b2b_feed.php?key=[KEY]&sort=xml&type=xml&lang=[LANG]&version=2015');
@@ -76,6 +77,7 @@ class Importer extends Module
 		$this->uninstallModuleTab('AdminImporterRunning');
 		$this->uninstallModuleTab('AdminImporterConfiguration');
 		$this->uninstallModuleTab('AdminImporterCounter');
+		$this->uninstallModuleTab('AdminImporterLab');
 		// $this->uninstallModuleTab('AdminImporterCron');
 
 		if (!parent::uninstall() ||
