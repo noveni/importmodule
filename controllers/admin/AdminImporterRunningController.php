@@ -190,27 +190,6 @@ class AdminImporterRunningController extends ModuleAdminController
 		die(json_encode($product));
 	}
 
-
-	public function xml2array ( $xmlObject, $out = array () )
-	{
-	    foreach ( (array) $xmlObject as $index => $node )
-	        $out[$index] = ( is_object ( $node ) ) ? $this->xml2array ( $node ) : $node;
-
-	    return $out;
-	}
-
-	private function in_array_r($needle, $haystack, $strict = false)
-	{
-		foreach($haystack as $item)
-		{
-			if ( ($strict ? $item === $needle : $item == $needle) || (is_array($item) && $this->in_array_r($needle, $item, $strict)))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public function testImport()
 	{
 		$this->loadXML();
@@ -232,34 +211,8 @@ class AdminImporterRunningController extends ModuleAdminController
 		{
 			$new_category_tab[] = (string)$product->category->category[$i]->cat[0]->title.'/'.(string)$product->category->category[$i]->cat[1]->title;
 		}
-		// p($product_info2->categories);
-		// p($product->category);
-		// p($ncategory);
-		// for ($i = 0; $i < $ncategory; $i++)
-		// {	
-		// 	$new_category_tab2[] = (string)$product->category['category'][$i]->cat[0]->title."/".(string)$product->category['category'][$i]->cat[1]->title;
-		// 	// if (!$this->in_array_r((int)$product->category['category'][$i]->cat[0]->id,$new_category_tab))
-		// 	// {
-		// 	// 	$new_category_tab[] = array(
-		// 	// 		'id' => (int)$product->category['category'][$i]->cat[0]->id,
-		// 	// 		'title' => (string)$product->category['category'][$i]->cat[0]->title,
-		// 	// 		'id_parent' => (int) 0
-		// 	// 	);
-		// 	// }
 
-		// 	// if (!$this->in_array_r((int)$product->category['category'][$i]->cat[1]->id,$new_category_tab))
-		// 	// {
-		// 	// 	$new_category_tab[] = array(
-		// 	// 		'id' => (int)$product->category['category'][$i]->cat[1]->id,
-		// 	// 		'title' => (string)$product->category['category'][$i]->cat[1]->title,
-		// 	// 		'id_parent' => (int)$product->category['category'][$i]->cat[0]->id
-		// 	// 	);
-		// 	// }
-
-
-		// }
 		$product->category = $new_category_tab;
-		//p($product->category);
 
 		$default_language_id = (int)Configuration::get('PS_LANG_DEFAULT');
 		$id_lang = Tools::getValue('iso_lang');
@@ -415,7 +368,7 @@ class AdminImporterRunningController extends ModuleAdminController
 		}
 
 		//Image
-		
+
 
 		// $product->id_shop_default = $this->context->shop->id;
 		// $product->supplier_reference = $product_info->artnr;
